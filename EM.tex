@@ -358,7 +358,169 @@ $p1*f(x1)+p2*f(x2) \le f(p1*x1+p2*x2)$总是成立，即函数的期望总是不
 
 \subsection{高斯混合模型}
 
-{\color{red} 高斯混合模型（Guassian Mixture Model, 简称GMM），xxxxx}
+高斯混合模型（Guassian Mixture Model, 简称GMM），为单一高斯概率密度函数的延伸，用多个高斯概率密度函数（正态分布曲线）精确地量化变量分布，是将变量分布分解为若干基于高斯概率密度函数（正态分布曲线）分布的统计模型。
+
+以下分别用单高斯模型和混合高斯模型分析同一组样本点。图\ref{SGM-model}使用单个二维高斯分布来描述数据，椭圆即为二倍标准差的正态分布椭圆。图\ref{GMM-model}使用两个二维高斯分布来描述数据，分别记为$\mathcal N({\mu}_1,{\Sigma}_1)$和$\mathcal N({\mu}_2,{\Sigma}_2)$，两个椭圆分别是这两个高斯分布的二倍标准差椭圆。
+\begin{figure}[!h]
+	\includegraphics[width=0.5\textwidth]{./figures/SGM.jpg}
+	\centering
+	\caption{单个二维高斯分布拟合数据}
+	\label{SGM-model}
+\end{figure}
+\begin{figure}[!h]
+	\includegraphics[width=0.5\textwidth]{./figures/GMM.jpg}
+	\centering
+	\caption{两个二维高斯分布拟合数据}
+	\label{GMM-model}
+\end{figure}
+
+可以看到使用两个二维高斯分布来描述图中的数据显然更合理。实际上图中的两个聚类的中的点是通过两个不同的正态分布随机生成而来。如果将两个二维高斯分布为$\mathcal N({\mu}_1,{\Sigma}_1)$和$\mathcal N({\mu}_2,{\Sigma}_2)$合成一个二维的分布，那么就可以用合成后的分布来描述图\ref{GMM-model}中的所有点。最直观的方法就是对这两个二维高斯分布做线性组合，用线性组合后的分布来描述整个集合中的数据。
+
+提出混合模型主要是为了能更好地近似一些较复杂的样本分布，通过不断增加单个分布的个数，可以任意地逼近任何连续的概率分布，所以我们认为任何样本分布都可以用混合模型来建模。为什么我们要假设数据是由若干个高斯分布组合而成的，而不假设是其他分布呢？实际上不管是什么分布，只要数量取得足够大，这个混合模型就会变得足够复杂，就可以用来逼近任意连续的概率密度分布。只是因为高斯函数具有良好的计算性能，所以GMM被广泛地应用。
+
+GMM与k-means类似，也是常见的聚类算法。不同的是，k-means把每个样本点分配到其中某一个cluster，而GMM是学习出一些概率密度函数，给出这些样本点分配到每个cluster的概率，每个单分布就是一个聚类中心，也称为软聚类 。所以GMM 不仅仅可以用于聚类，还可以用于概率密度的估计。
+
+设有随机变量$X$，则GMM的概率密度函数可以用下式表示：
+\begin{equation}\label{GMM}
+  \begin{split}
+    p(x) &= \sum_{k=1}^{K}p(k)p(x|k)\\
+	&= \sum_{k=1}^{K}\pi_k\mathcal{N}(x|\mu_k, \Sigma_k).
+  \end{split}
+\end{equation}
+
+其中$\mathcal{N}(x|\mu_k, \Sigma_k)$称为混合模型中的第$k$个组件（component）。$\pi_k$是混合系数（mixture coefficient），且满足$\sum_{k=1}^K\pi_k = 1(0\le\pi_k\le1)$。实际上，可以认为$\pi_k$就是每个分量$\mathcal{N}(x|\mu_k, \Sigma_k)$的权重。
+
+根据式(\ref{GMM}) ，如果我们要从GMM分布中随机地取一个点，需要两步：第一，随机地在这$K$个组件之中选一个，每个组件被选中的概率实际上就是它的系数$\pi_k$；第二，选中了组件之后，再单独地考虑从这个组件的分布中选取一个点。
+
+对一个样本集建立高斯混合模型的过程，就是根据已知样本集X反推高斯混合模型的参数$(\mu,\sigma,\pi)$，这是一个参数估计问题。首先想到用最大似然的方法求解，也就是，要确定参数$\mu,\sigma,\pi$使得它所确定的概率分布生成这些样本点的概率最大，这个概率也就是似然函数，如下：
+\begin{equation}
+  p(x) = \prod_{i=1}^{N}x_k.
+\end{equation}
+而一般对于单个样本点其概率较小，多个相乘后更小，容易造成浮点数下溢，所以一般是对似然函数求对数，变成加和形式：$\sum_{i=1}^{N}lnp(x_i)$。这个叫做log似然函数，目标是要最大化它。用log似然函数对参数分别求偏导，令偏导等于0，可求解得参数。然而，GMM的log似然函数是如下形式：
+\begin{equation}
+  lnL(\mu,\sigma,\pi) = \sum_{i=1}^{N}ln\sum_{k=1}^{K}\pi_k\mathcal{N}(y_n|\mu_k,\sigma_k).
+\end{equation}
+
+可以看到对数中有求和，直接求导求解将导致一系列复杂的运算，无法求出这个对数似然函数的最大值，故考虑使用EM算法。
+
+那么极大似然估计与EM算法分别适用于什么问题呢？如果我们已经清楚了某个变量服从的高斯分布，而且通过采样得到了这个变量的样本数据，想求高斯分布的参数，这时候极大似然估计可以胜任这个任务；而如果我们要求解的是一个混合模型，只知道混合模型中各个类的分布模型（譬如都是高斯分布）和对应的采样数据，而不知道这些采样数据分别来源于哪一类（隐变量），那这时候就可以借鉴EM算法。EM算法可以用于解决数据缺失的参数估计问题（隐变量的存在实际上就是数据缺失问题，缺失了各个样本来源于哪一类的记录）。
+
+EM算法分两步，第一步先求出要估计参数的粗略值，第二步使用第一步的值最大化似然函数。因此要先求出GMM的似然函数。
+
+考虑GMM生成一个样本点的过程，这里对每个$\mathbf x_i$引入隐变量$\mathbf z$，$\mathbf z$是一个$K$维向量，如果生成$\mathbf x_i$时选择了第$k$个component，则$\mathbf z_k=1$，其他元素都为0，$\sum_{k=1}^{K}z_k=1$.
+
+假设$\mathbf z$是已知的，则样本集变成了${X,Z}$，要求解的似然函数变成了：
+\begin{equation}
+  p(X,Z|\mu,\sum,\pi) = \prod_{n=1}^N\prod_{k=1}^K\pi_k^{z_{nk}}\mathcal N(\mathbf x_n|\mu_k,\sum_k)^{z_{nk}}.
+\end{equation}
+log似然函数为：
+\begin{equation}\label{loglikelihood}
+  lnp(X,Z|\mu,\sum,\pi) = \sum_{n=1}^N\sum_{k=1}^K\mathbf z_{nk}[ln\pi_k + ln\mathcal N(\mathbf x_n|\mu_k,\sum_k)].
+\end{equation}
+
+可以看到，这次ln直接对Gaussian作用，求和在ln外面，所以可以直接求最大似然解了。
+
+\textbf{EM算法估计GMM参数的过程如下：}
+
+\textbf{1.初始化一组参数$\mu ^0,\Sigma ^0,\pi ^0$}
+
+\textbf{2.E-step}
+
+然而，事实上$\mathbf z$是不知道的，我们只是假设$\mathbf z$已知。而$\mathbf z$的值是通过后验概率观测，所以这里考虑用$\mathbf z$值的期望在上述似然函数中代替$\mathbf z$。
+
+对于一个样本点$\mathbf x$：
+\begin{equation}
+  p(\mathbf z) = \prod_{k=1}^K\pi_k^{z_k}.
+\end{equation}
+\begin{equation}
+  p(\mathbf x|\mathbf z_k=1) = \mathcal N(x|\mu_k,\sum_k).
+\end{equation}
+\begin{equation}
+  p(\mathbf x|\mathbf z) = \prod_{k=1}^K\mathcal N(\mathbf x|\mu_k,\sum_k)^{z_k}.
+\end{equation}
+\begin{equation}
+  \begin{split}
+    p(\mathbf x) &= \sum_zp(\mathbf z)p(\mathbf x|\mathbf z)\\
+    &= \sum_{k=1}^K\pi_k\mathcal N(\mathbf x|\mu_k,\sum_k).
+  \end{split}
+\end{equation}
+
+后验概率（固定$\mu,\sum,\pi$):
+\begin{equation}
+  p(\mathbf z|\mathbf x,\mu,\sum,\pi) = \frac{p(\mathbf x|\mathbf z)p(\mathbf z)}{p(\mathbf x)}\text{正比于}\prod_{n=1}^N\prod_{k=1}^K[{\pi_k\mathcal N(x_n|\mu_k,\sum_k)}]^{z_{nk}}.
+\end{equation}
+
+因为${\mathbf z_n}$之间是相互独立的。
+ 
+计算$\mathbf z$期望$\gamma(\mathbf z_{nk})$（z向量只有一个值取1，其余为0）：
+\begin{equation}
+  \begin{split}
+    \gamma(\mathbf z_{nk}) &= E[\mathbf z_{nk}]\\
+    &= 0*p(\mathbf z_{nk}=0|\mathbf x_n)+1*p(\mathbf z_{nk}=1|\mathbf x_n)\\
+    &=p(\mathbf z_{nk}=1|\mathbf x_n)\\
+    &=\frac{p(\mathbf z_{nk}=1)p(\mathbf x_n|\mathbf z_{nk}=1)}{p(\mathbf x_n)}\\
+    &=\frac{\pi_k\mathcal N(\mathbf x|\mu_k,\sum_k)}{\sum_{j=1}^K\pi_j\mathcal N(\mathbf x|\mu_j,\sum_j)}.
+  \end{split}
+\end{equation}
+
+将$\mathbf z$值用期望代替，则待求解的log似然函数(\ref{loglikelihood})式变为：
+\begin{equation}
+  E_z[lnp(X,Z|\mu,\sum,\pi)] = \sum_{n=1}^N\sum_{k=1}^K\gamma (\mathbf z_{nk})[ln\pi_k + ln\mathcal N(\mathbf x_n|\mu_k,\sum_k)].
+\end{equation}
+
+\textbf{3.M-step}
+
+现在可以最大化似然函数求解参数了，首先对$\mu$求偏导，令偏导等于0，可得：
+\begin{equation}
+  \sum_{n=1}^N\sum_{k=1}^K\gamma (\mathbf z_{nk})\sum_k(\mathbf x_n-\mu_k) = 0.
+\end{equation}
+\begin{equation}
+  \mu_k = \frac{1}{N_k}\sum_{n=1}^N\gamma (\mathbf z_{nk}){\mathbf x_n},\text{其中}N_k = \sum_{n=1}^N\gamma (\mathbf z_{nk}).
+\end{equation}
+
+再对$\sum_k$求偏导，令偏导等于0，可得：
+\begin{equation}
+  \sum_k = \frac{1}{N_k}\sum_{n=1}^N\gamma (\mathbf z_{nk})(\mathbf x_n-\mu_k)(\mathbf x_n-\mu_k)^T.
+\end{equation}
+
+接下来还需求解$\pi$，注意到$\pi$需满足$\sum_{k=1}^K\pi_k=1$，所以这是一个带等式约束的最大值问题，使用拉格朗日乘数法。
+
+构造拉格朗日函数：
+\begin{equation}
+  L=lnp(X|\pi,\mu,\sum)+\lambda(\sum_{k=1}^K\pi_k-1).
+\end{equation}
+
+对$\pi$求导，令导数为0：
+\begin{equation}
+  \sum_{n=1}^N\frac{\mathcal N(\mathbf x|\mu_k,\sum_k)}{\sum_{j=1}^K\pi_j\mathcal N(\mathbf x|\mu_j,\sum_j)}+\lambda=0.
+\end{equation}
+
+两边同乘$\pi_k$得：
+\begin{equation}
+  \sum_{n=1}^N\gamma (\mathbf z_{nk}) + \lambda\pi_k=0.
+\end{equation}
+\begin{equation}
+  N_k+\lambda\pi_k=0.
+\end{equation}
+
+两边对k求和：
+\begin{equation}
+  \sum_{k=1}^KN_k+\sum_{k=1}^K\lambda\pi_k=0.
+\end{equation}
+\begin{equation}
+  N+\lambda=0.
+\end{equation}
+
+可得：$\lambda=-N$
+ 
+代入可得：$\pi_k=\frac{N_k}{N}.$
+
+\textbf{4.检查是否收敛}
+
+重复E-step和M-step两步，直到收敛，即可求得一个局部最优解。
+
+
+
 
 \section{应用与实验}
 
