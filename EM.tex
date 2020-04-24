@@ -26,8 +26,8 @@
 \begin{document}
 
 \title{基于期望最大化EM算法估计混合高斯模型GMM参数}
-\author{作者}
-%\date{January 25, 2015}
+\author{SY1906206 王阁元，SY1906407 罗薇，SY1906202 寄家豪}
+%\date{January 25, 205}
 \maketitle
 
 \section{理论}
@@ -362,31 +362,31 @@ $p1*f(x1)+p2*f(x2) \le f(p1*x1+p2*x2)$总是成立，即函数的期望总是不
 
 高斯混合模型（Guassian Mixture Model, 简称GMM），为单一高斯概率密度函数的延伸，用多个高斯概率密度函数（正态分布曲线）精确地量化变量分布，是将变量分布分解为若干基于高斯概率密度函数（正态分布曲线）分布的统计模型。
 
-以下分别用单高斯模型和混合高斯模型分析同一组样本点。图\ref{SGM-model}使用单个二维高斯分布来描述数据，椭圆即为二倍标准差的正态分布椭圆。图\ref{GMM-model}使用两个二维高斯分布来描述数据，分别记为$\mathcal N({\mu}_1,{\Sigma}_1)$和$\mathcal N({\mu}_2,{\Sigma}_2)$，两个椭圆分别是这两个高斯分布的二倍标准差椭圆。
+以下分别用单高斯模型和混合高斯模型分析同一组样本点。图\ref{SGM-model} 使用单个二维高斯分布来描述数据，椭圆即为二倍标准差的正态分布椭圆。图\ref{GMM-model} 使用两个二维高斯分布来描述数据，分别记为$\mathcal N({\mu}_1,{\Sigma}_1)$和$\mathcal N({\mu}_2,{\Sigma}_2)$，两个椭圆分别是这两个高斯分布的二倍标准差椭圆。
 \begin{figure}[!h]
-	\includegraphics[width=0.5\textwidth]{./figures/SGM.jpg}
-	\centering
-	\caption{单个二维高斯分布拟合数据}
-	\label{SGM-model}
+  \includegraphics[width=0.5\textwidth]{./figures/SGM.jpg}
+  \centering
+  \caption{单个二维高斯分布拟合数据}
+  \label{SGM-model}
 \end{figure}
 \begin{figure}[!h]
-	\includegraphics[width=0.5\textwidth]{./figures/GMM.jpg}
-	\centering
-	\caption{两个二维高斯分布拟合数据}
-	\label{GMM-model}
+  \includegraphics[width=0.5\textwidth]{./figures/GMM.jpg}
+  \centering
+  \caption{两个二维高斯分布拟合数据}
+  \label{GMM-model}
 \end{figure}
 
-可以看到使用两个二维高斯分布来描述图中的数据显然更合理。实际上图中的两个聚类的中的点是通过两个不同的正态分布随机生成而来。如果将两个二维高斯分布为$\mathcal N({\mu}_1,{\Sigma}_1)$和$\mathcal N({\mu}_2,{\Sigma}_2)$合成一个二维的分布，那么就可以用合成后的分布来描述图\ref{GMM-model}中的所有点。最直观的方法就是对这两个二维高斯分布做线性组合，用线性组合后的分布来描述整个集合中的数据。
+可以看到使用两个二维高斯分布来描述图中的数据显然更合理。实际上图中的两个聚类的中的点是通过两个不同的正态分布随机生成而来。如果将两个二维高斯分布为$\mathcal N({\mu}_1,{\Sigma}_1)$和$\mathcal N({\mu}_2,{\Sigma}_2)$合成一个二维的分布，那么就可以用合成后的分布来描述图\ref{GMM-model} 中的所有点。最直观的方法就是对这两个二维高斯分布做线性组合，用线性组合后的分布来描述整个集合中的数据。
 
 提出混合模型主要是为了能更好地近似一些较复杂的样本分布，通过不断增加单个分布的个数，可以任意地逼近任何连续的概率分布，所以我们认为任何样本分布都可以用混合模型来建模。为什么我们要假设数据是由若干个高斯分布组合而成的，而不假设是其他分布呢？实际上不管是什么分布，只要数量取得足够大，这个混合模型就会变得足够复杂，就可以用来逼近任意连续的概率密度分布。只是因为高斯函数具有良好的计算性能，所以GMM被广泛地应用。
 
-GMM与k-means类似，也是常见的聚类算法。不同的是，k-means把每个样本点分配到其中某一个cluster，而GMM是学习出一些概率密度函数，给出这些样本点分配到每个cluster的概率，每个单分布就是一个聚类中心，也称为软聚类 。所以GMM 不仅仅可以用于聚类，还可以用于概率密度的估计。
+GMM与k-means类似，也是常见的聚类算法。不同的是，k-means把每个样本点分配到其中某一个cluster，而GMM是学习出一些概率密度函数，给出这些样本点分配到每个cluster的概率，每个单分布就是一个聚类中心，也称为软聚类。所以GMM 不仅仅可以用于聚类，还可以用于概率密度的估计。
 
 设有随机变量$X$，则GMM的概率密度函数可以用下式表示：
 \begin{equation}\label{GMM}
   \begin{split}
     p(x) &= \sum_{k=1}^{K}p(k)p(x|k)\\
-	&= \sum_{k=1}^{K}\pi_k\mathcal{N}(x|\mu_k, \Sigma_k).
+    &= \sum_{k=1}^{K}\pi_k\mathcal{N}(x|\mu_k, \Sigma_k).
   \end{split}
 \end{equation}
 
@@ -398,9 +398,9 @@ GMM与k-means类似，也是常见的聚类算法。不同的是，k-means把每
 \begin{equation}
   p(x) = \prod_{i=1}^{N}x_k.
 \end{equation}
-而一般对于单个样本点其概率较小，多个相乘后更小，容易造成浮点数下溢，所以一般是对似然函数求对数，变成加和形式：$\sum_{i=1}^{N}lnp(x_i)$。这个叫做log似然函数，目标是要最大化它。用log似然函数对参数分别求偏导，令偏导等于0，可求解得参数。然而，GMM的log似然函数是如下形式：
+而一般对于单个样本点其概率较小，多个相乘后更小，容易造成浮点数下溢，所以一般是对似然函数求对数，变成加和形式：$\sum_{i=1}^{N}\ln p(x_i)$。这个叫做log似然函数，目标是要最大化它。用log似然函数对参数分别求偏导，令偏导等于0，可求解得参数。然而，GMM的log似然函数是如下形式：
 \begin{equation}
-  lnL(\mu,\sigma,\pi) = \sum_{i=1}^{N}ln\sum_{k=1}^{K}\pi_k\mathcal{N}(y_n|\mu_k,\sigma_k).
+  \ln L(\mu,\sigma,\pi) = \sum_{i=1}^{N}\ln\sum_{k=1}^{K}\pi_k\mathcal{N}(y_n|\mu_k,\sigma_k).
 \end{equation}
 
 可以看到对数中有求和，直接求导求解将导致一系列复杂的运算，无法求出这个对数似然函数的最大值，故考虑使用EM算法。
@@ -417,16 +417,16 @@ EM算法分两步，第一步先求出要估计参数的粗略值，第二步使
 \end{equation}
 log似然函数为：
 \begin{equation}\label{loglikelihood}
-  lnp(X,Z|\mu,\sum,\pi) = \sum_{n=1}^N\sum_{k=1}^K\mathbf z_{nk}[ln\pi_k + ln\mathcal N(\mathbf x_n|\mu_k,\sum_k)].
+  \ln p(X,Z|\mu,\sum,\pi) = \sum_{n=1}^N\sum_{k=1}^K\mathbf z_{nk}[\ln\pi_k + \ln\mathcal N(\mathbf x_n|\mu_k,\sum_k)].
 \end{equation}
 
-可以看到，这次ln直接对Gaussian作用，求和在ln外面，所以可以直接求最大似然解了。
+可以看到，这次 ln 直接对Gaussian作用，求和在 ln 外面，所以可以直接求最大似然解了。
 
 \textbf{EM算法估计GMM参数的过程如下：}
 
-\textbf{1.初始化一组参数$\mu ^0,\Sigma ^0,\pi ^0$}
+\textbf{1. 初始化一组参数$\mu ^0,\Sigma ^0,\pi ^0$}
 
-\textbf{2.E-step}
+\textbf{2. E-step}
 
 然而，事实上$\mathbf z$是不知道的，我们只是假设$\mathbf z$已知。而$\mathbf z$的值是通过后验概率观测，所以这里考虑用$\mathbf z$值的期望在上述似然函数中代替$\mathbf z$。
 
@@ -453,7 +453,7 @@ log似然函数为：
 \end{equation}
 
 因为${\mathbf z_n}$之间是相互独立的。
- 
+
 计算$\mathbf z$期望$\gamma(\mathbf z_{nk})$（z向量只有一个值取1，其余为0）：
 \begin{equation}
   \begin{split}
@@ -467,10 +467,10 @@ log似然函数为：
 
 将$\mathbf z$值用期望代替，则待求解的log似然函数(\ref{loglikelihood})式变为：
 \begin{equation}
-  E_z[lnp(X,Z|\mu,\sum,\pi)] = \sum_{n=1}^N\sum_{k=1}^K\gamma (\mathbf z_{nk})[ln\pi_k + ln\mathcal N(\mathbf x_n|\mu_k,\sum_k)].
+  E_z[\ln p(X,Z|\mu,\sum,\pi)] = \sum_{n=1}^N\sum_{k=1}^K\gamma (\mathbf z_{nk})[\ln\pi_k + \ln\mathcal N(\mathbf x_n|\mu_k,\sum_k)].
 \end{equation}
 
-\textbf{3.M-step}
+\textbf{3. M-step}
 
 现在可以最大化似然函数求解参数了，首先对$\mu$求偏导，令偏导等于0，可得：
 \begin{equation}
@@ -489,7 +489,7 @@ log似然函数为：
 
 构造拉格朗日函数：
 \begin{equation}
-  L=lnp(X|\pi,\mu,\sum)+\lambda(\sum_{k=1}^K\pi_k-1).
+  L=\ln p(X|\pi,\mu,\sum)+\lambda(\sum_{k=1}^K\pi_k-1).
 \end{equation}
 
 对$\pi$求导，令导数为0：
@@ -514,14 +514,12 @@ log似然函数为：
 \end{equation}
 
 可得：$\lambda=-N$
- 
+
 代入可得：$\pi_k=\frac{N_k}{N}.$
 
-\textbf{4.检查是否收敛}
+\textbf{4. 检查是否收敛}
 
 重复E-step和M-step两步，直到收敛，即可求得一个局部最优解。
-
-
 
 
 \section{应用与实验}
