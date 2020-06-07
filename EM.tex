@@ -649,13 +649,7 @@ MNIST数据集原始是6万张训练样本，1万张测试样本。由于本部�
 
 （2）\textbf{模型学习}
 
-\begin{figure}[!h]
-  \includegraphics[width=0.8\textwidth]{./figures/diff4.pdf}
-  \centering
-  \caption{数字4的5种不同写法}\label{fig:diff4}
-\end{figure}
-
-由于每一个数字的手写方法可能不唯一，而直接聚类可能存在重复类别的问题，直观的讲，如图~\ref{fig:diff4} 所示，数字4有5种不同的写法，如果用直接聚类去做的话，我们很难保证最后的聚类结果中不会出现两个表征4的类，这样就有可能会挤掉其他的类，如此一来，就会使得聚类结果不太理想。于是考虑分类别聚类，顾名思义，就是对于每一个类别，选取相对应的子数据集，然后训练一个高斯混合模型来表征这个类别，这样就可以捕获同一数字不同的写法，达到更好的识别效果。
+由于每一个数字的手写方法可能不唯一，而直接聚类可能存在重复类别的问题，直观的讲，加入数字4有5种不同的写法，如果用直接聚类去做的话，我们很难保证最后的聚类结果中不会出现两个表征数字4的类，这样就有可能会挤掉其他的类，如此一来，就会使得聚类结果不太理想。于是考虑分类别聚类，顾名思义，就是对于每一个类别，选取相对应的子数据集，然后训练一个高斯混合模型来表征这个类别，这样就可以捕获同一数字不同的写法，达到更好的识别效果。
 
 （3）\textbf{性能评估}
 
@@ -814,13 +808,19 @@ MNIST数据集原始是6万张训练样本，1万张测试样本。由于本部�
   \caption{考虑类与类之间不独立，用Kmeans初始化类中心的前提下，四种评测指标随分量个数的变化。}\label{fig:2-4metrics}
 \end{figure}
 
-图~\ref{fig:2-4metrics} 展示了考虑类与类之间不独立，用Kmeans初始化类中心的前提下，四种评测指标随分量个数的变化，可以看到四种指标基本不相上下，说明我们的模型很可靠。最终，我们的单独聚类模型得到的类均值展示如图~\ref{fig:2-class_means} 所示，可以看到，每个数字都存在一些不同的写法，包括书写字体、书写角度以及书写清晰度，由此可见，对每一个数字类别单独聚类是非常有必要的。
-
 \begin{figure}[!h]
   \centering
-  \includegraphics[width=0.9\textwidth]{figures/digits.pdf}
-  \vspace{-.3cm}\caption{单独聚类模型的各个类均值展示}\label{fig:2-class_means}
+  \includegraphics[width=0.8\textwidth]{./figures/diff4.pdf}
+  \vspace{-.3cm}\caption{数字4的5种不同写法}\label{fig:diff4}
 \end{figure}
+
+图~\ref{fig:2-4metrics} 展示了考虑类与类之间不独立，用Kmeans初始化类中心的前提下，四种评测指标随分量个数的变化，可以看到四种指标基本不相上下，说明我们的模型很可靠。最终，我们的单独聚类模型得到的类均值展示如图~\ref{fig:diff4} 所示，可以看到，每个数字都存在一些不同的写法，包括书写字体、书写角度以及书写清晰度，由此可见，对每一个数字类别单独聚类是非常有必要的。
+
+% \begin{figure}[!h]
+%   \centering
+%   \includegraphics[width=0.9\textwidth]{figures/digits.pdf}
+%   \vspace{-.3cm}\caption{单独聚类模型的各个类均值展示}\label{fig:2-class_means}
+% \end{figure}
 
 \section{展望}
 xxx
