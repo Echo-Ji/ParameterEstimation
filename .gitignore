@@ -2,3 +2,6 @@
 ref/
 code/
 expt/
+*.aux
+*.log
+*.synctex.gz
