@@ -608,10 +608,84 @@ F1分数是统计学中用来衡量二分类模型精确度的一种指标，它
 \end{equation}
 
 \subsection{实验设置}
+本次实验主要分为三部分，第一部分为采取GMM模型对mnist数据集进行聚类，然后通过Adjusted rand index，acc，precision，recall，f1-score这些评价标准对聚类的结果进行一个评判；第二部分则是包含采用GMM模型直接对mnist数据集中的每一类样本进行单独建模，最后采用最大似然的方法对新来的测试样本进行预测，从而解决了mnist数据集上的分类任务；最后一部分则是在mnist数据集上实现新的样本生成。
+
+\subsubsection{聚类任务}
+
+聚类任务主要分为三个步骤，数据预处理，模型预测，性能评估。
+
+（1）\textbf{数据预处理}
+
+mnist数据集原始是6万张训练样本，1万张测试样本。由于本部分主要是用于检验聚类任务，因此训练集和测试集的划分的必要性不是很大，因此，我们将训练集和测试集融合，形成了7万张样本以及包含其对应标签，我们的目标是为了将这7万张样本通过无监督的聚类方法将其聚成若干类，然后检验聚类结果。
+
+由于每个样本图片可以视为一个28*28的矩阵，我们先采用归一化的方法将矩阵的像素值调整在[0,1]之间，然后采用flatten技术将这个28*28的矩阵拍平为长度为784维的向量。那么问题来了，对于784维的特征，显然过于冗长，因此需要考虑将其进行压缩，在此我们选取课程学习的经典降维方法PCA，即主成分分析，对这784维长度的向量进行降维，而降维后的维度d我们将其视为一个超参数，通过调整不同的d得到不同的评测结果，最终可以选取评测结果最好对应的参数d作为最终最优的超参数值。PCA降维的原理图如下所示：
+
+\begin{figure}[!h]
+  \includegraphics[width=0.5\textwidth]{./figures/PCA_mnist.png}
+  \centering
+  \caption{PCA原理图}
+  \label{PCA-model}
+\end{figure}
+
+
+（2）\textbf{模型预测}
+
+实际上，由于MNIST数据集我们是已知先验知识为10各类别，因此我们直接选取components=10作为高斯分布的个数，聚类模型我们选取含有10个高斯分布GMM模型对这7万张图片进行聚类。同时在聚类结束后给出这7万张图片预测的标签。
+
+（3）\textbf{性能评估}
+
+关于性能评估，首先是对于聚类结果的一个直观上的评估，即判断聚类的每一类是否与真实的类分布吻合，因此很自然我们采用Adjusted rand index这个评价标准来评判聚类的效果。兰德指数通过考虑所有样本并计算在预测的聚类和真实的聚类中分配在相同或不同聚类中的对来计算两个聚类之间的相似性度量。
+
+此外除了衡量聚类的结果，我们进一步想通过聚类的结果对样本的标签进行预测。因此我们提出了一种新的与标签相关的评测方法：具体来说，对于已经无监督聚类得到这10个未知的类之后，我们对每一类的真实标签进行计数统计，选取票数最高的真实标签作为预测的标签，并作为整个聚类簇的标签，最后我们将这所有样本预测的标签与真实的标签进行对比，便可计算出ACC，precision，recall，f1-score这些常见的分类评价指标。
 
 \subsection{实验环境}
 
 \subsection{实验结果与讨论}
+
+\subsubsection{聚类任务的实验结果及结论}
+
+我们把PCA降维的维度d作为横轴，分别把Adjusted rand index，acc，precision，recall，f1-score这些评价标准作为纵轴，将其结果可视化出来，如下图\ref{cluster_adjusted_rand_score},\ref{cluster_acc},\ref{cluster_precision},\ref{cluster_recall},\ref{cluster_f1}所示。
+
+\begin{figure}[!h]
+  \includegraphics[width=0.5\textwidth]{./figures/cluster_adjusted_rand_score.png}
+  \centering
+  \caption{adjusted rand score随d的变化图}
+  \label{cluster_adjusted_rand_score}
+\end{figure}
+
+
+\begin{figure}[!h]
+  \includegraphics[width=0.5\textwidth]{./figures/cluster_acc.png}
+  \centering
+  \caption{acc随d的变化图}
+  \label{cluster_acc}
+\end{figure}
+
+
+\begin{figure}[!h]
+  \includegraphics[width=0.5\textwidth]{./figures/cluster_precision.png}
+  \centering
+  \caption{precision随d的变化图}
+  \label{cluster_precision}
+\end{figure}
+
+
+\begin{figure}[!h]
+  \includegraphics[width=0.5\textwidth]{./figures/cluster_recall.png}
+  \centering
+  \caption{recall随d的变化图}
+  \label{cluster_recall}
+\end{figure}
+
+
+\begin{figure}[!h]
+  \includegraphics[width=0.5\textwidth]{./figures/cluster_f1.png}
+  \centering
+  \caption{f1随d的变化图}
+  \label{cluster_f1}
+\end{figure}
+
+首先根据上述五个实验结果图，可以看出，当PCA降维的维度为20时，模型聚类的效果最好。但是仔细看会发现模型预测的acc，f1-score等值并不是很高，这与我们常见的其他机器学习模型进行分类的结果相差甚远，因此产生了疑问。再经过仔细检查后发现，其实是预测方法存在一定的漏洞，虽然GMM模型将原始的数据集聚成10个簇，但是在预测标签时，可能会出现不同的簇它们出现最多的标签是同一个，此时会导致最后预测的标签只剩下不到10个类别，因此会丢失很多信息，导致了这样准确率不高的结果。
 
 \section{展望}
 xxx
