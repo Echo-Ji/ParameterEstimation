@@ -5,5 +5,5 @@ expt/
 *.aux
 *.log
 *.synctex.gz
-*.pdf
+/*.pdf
 *.synctex(busy)
