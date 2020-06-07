@@ -10,6 +10,7 @@
 \usepackage{epstopdf}
 \usepackage{xspace}
 \usepackage{amsmath,amssymb}
+\usepackage{booktabs}
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
 \hyphenpenalty = 5000
@@ -609,6 +610,7 @@ F1分数是统计学中用来衡量二分类模型精确度的一种指标，它
 \end{equation}
 
 \subsection{实验设置}
+
 本次实验主要分为三部分，第一部分为采取GMM模型对MNIST数据集进行聚类，然后通过$Adjusted\_ rand\_index$，$accuracy$，$precision$，$recall$，$F1$这些评价标准对聚类的结果进行一个评判；第二部分则是包含采用GMM模型直接对MNIST数据集中的每一类样本进行单独建模，最后采用最大似然的方法对新来的测试样本进行预测，从而解决了MNIST数据集上的分类任务；最后一部分则是在MNIST数据集上实现新的样本生成。
 
 \subsubsection{整体聚类}
@@ -661,13 +663,45 @@ MNIST数据集原始是6万张训练样本，1万张测试样本。由于本部�
 
 \subsection{实验环境}
 
+我们的实验运行在一个单机Linux服务器上，机器内存64G，2颗Intel Xeon E5-2680 v2的CPU以及4颗GeForce GTX 1080 Ti的GPU（未用到），具体硬件配置如~\ref{tab:hard} 所示。
+
+\begin{table}[!h]
+  \centering
+  \caption{实验环境硬件配置}\label{tab:hard}
+  \begin{tabular}{cc}
+    \toprule
+    项目 & 配置 \\
+    \midrule
+    CPU & Intel(R) Xeon(R) CPU E5-2650 v2, 2.60GHz\\
+    GPU & GeForce GTX 1080 Ti, PCIe, 11G,3584 CUDA cores, Pascal Architecture\\
+    Memory & 16G, DDR4, 2133Mhz\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+\begin{table}[!h]
+  \centering
+  \caption{实验环境软件配置}\label{tab:soft}
+  \begin{tabular}{ccc}
+    \toprule
+    类型 & 名称 & 版本 \\
+    \midrule
+    系统 & Ubuntu Linux & 16.04.4\\
+    编译器 & GCC & 5.4.0\\
+    集成管理平台 & Anaconda & 4.3.30\\
+    编程语言 & Python & 3.6.5\\
+    机器学习库 & Scikit-learn & 0.19.1\\
+    图像绘制库 & Scikit-image & 0.13.1\\
+    图像绘制库 & Matplotlib & 2.2.2\\
+    图像绘制库 & Pillow & 5.1.0\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+就软件环境而言，如表~\ref{tab:soft} 所示，其余基础的Python库如 Numpy，Pandas 等在此处省略。
+
 \subsection{实验结果与讨论}
 
 \subsubsection{整体聚类}
-
-我们把PCA降维的维度$d$作为横轴，分别把$Adjusted\_ rand\_index$，$accuracy$，$precision$，$recall$，$F1$这些评价标准作为纵轴，将其结果可视化出来，如下图~\ref{cluster_adjusted_rand_score},~\ref{fig:cluster_metrics}所示。
-
-
 
 \begin{figure}[!h]
   \includegraphics[width=0.5\textwidth]{./figures/cluster_adjusted_rand_score.png}
@@ -699,6 +733,8 @@ MNIST数据集原始是6万张训练样本，1万张测试样本。由于本部�
   \caption{gmm聚类中心点可视化}
   \label{gmm_means}
 \end{figure}
+
+我们把PCA降维的维度$d$作为横轴，分别把$Adjusted\_ rand\_index$，$accuracy$，$precision$，$recall$，$F1$这些评价标准作为纵轴，将其结果可视化出来，如下图~\ref{cluster_adjusted_rand_score},~\ref{fig:cluster_metrics}所示。
 
 % \begin{figure}[!h]
 %   \includegraphics[width=0.5\textwidth]{./figures/cluster_acc.png}
@@ -732,8 +768,6 @@ MNIST数据集原始是6万张训练样本，1万张测试样本。由于本部�
 % \end{figure}
 
 首先根据上述五个实验结果图，可以看出，当PCA降维的维度为40时，模型聚类的效果最好。但是仔细看会发现模型预测的$accuracy$，$F1$等值并不是很高，这与我们常见的其他机器学习模型进行分类的结果相差甚远，因此产生了疑问。我们现将聚类的结果的中心店进行可视化，如图~\ref{gmm_means}所示，可见直接聚类的效果并不一定较优，可能出现类别中心重复的现象。再经过仔细检查后发现，其实是预测方法存在一定的漏洞，虽然GMM模型将原始的数据集聚成10个簇，但是在预测标签时，可能会出现不同的簇它们出现最多的标签是同一个，此时会导致最后预测的标签只剩下不到10个类别，因此会丢失很多信息，导致了这样准确率不高的结果。
-
-
 
 \subsubsection{单独聚类}
 
@@ -770,7 +804,7 @@ MNIST数据集原始是6万张训练样本，1万张测试样本。由于本部�
   \caption{考虑类与类之间不独立，用Kmeans初始化类中心的前提下，四种评测指标随分量个数的变化。}\label{fig:2-4metrics}
 \end{figure}
 
-最终，我们的单独聚类模型得到的类均值展示如图~\ref{fig:2-class_means} 所示，可以看到，每个数字都存在一些不同的写法，包括书写字体、书写角度以及书写清晰度，由此可见，对每一个数字类别单独聚类是非常有必要的。
+图~\ref{fig:2-4metrics} 展示了考虑类与类之间不独立，用Kmeans初始化类中心的前提下，四种评测指标随分量个数的变化，可以看到四种指标基本不相上下，说明我们的模型很可靠。最终，我们的单独聚类模型得到的类均值展示如图~\ref{fig:2-class_means} 所示，可以看到，每个数字都存在一些不同的写法，包括书写字体、书写角度以及书写清晰度，由此可见，对每一个数字类别单独聚类是非常有必要的。
 
 \begin{figure}[!h]
   \centering
