@@ -6,3 +6,4 @@ expt/
 *.log
 *.synctex.gz
 *.pdf
+*.synctex(busy)
