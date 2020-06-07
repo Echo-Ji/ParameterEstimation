@@ -30,7 +30,7 @@
 %\date{January 25, 205}
 \maketitle
 
-\section{理论}
+\section{理论基础}
 
 EM算法也称作期望最大化（Expectation-Maximization，简称EM）算法，它是一种迭代算法，
 用于含有隐变量的概率模型\textbf{参数}的极大似然估计或极大后验概率估计。
@@ -521,8 +521,7 @@ log似然函数为：
 
 重复E-step和M-step两步，直到收敛，即可求得一个局部最优解。
 
-
-\section{应用与实验}
+\section{应用问题描述}
 
 \subsection{GMM的应用场景}
 
@@ -536,5 +535,112 @@ GMM在实际应用中十分广泛，比如语音识别、图像生成、以及�
 
 \subsection{实验创想}
 由于聚类任务是GMM算法的一大重要应用，在此我们选取图像聚类为导向，进行GMM算法的实验验证。我们先计划使用比较简单的MNIST数据集，验证GMM算法在的聚类任务中的有效性。然后我们再选取一些彩色图像进行图像分割任务，从而让GMM的实用性得以体现。
+
+\section{实验}
+
+\subsection{数据集与评价指标}
+
+\subsubsection{数据集}
+本实验采用的MNIST数据库是由Yann LeCun教授提供的手写数字数据库文件，该数据集包含了60000张训练图像和10000张测试图像。这些数字已经过尺寸标准化并位于图像中心，且图像是28*28大小的灰度图像，每个像素是一个八位字节。数据集共包括四个文件，一个训练图片集train-images-idx3-ubyte.gz，一个训练标签集train-labels-idx1-ubyte.gz，一个测试图片集t10k-images-idx3-ubyte.gz，一个测试标签集t10k-labels-idx1-ubyte.gz。上述四个文件直接解压就可以使用了。
+
+\subsubsection{评价指标}
+在本实验中，手写数字识别的评价指标采用了调整兰德系数(Adjusted rand index)，正确率(accuracy)，查准率(precision)，查全率(recall)，F1分数(F1-Score)。
+
+兰德系数(Rand index)需要给定实际类别信息 $C$，假设$K$是聚类结果，$a$表示在$C$与$K$中都是同类别的元素对数，$b$表示在$C$与$K$中都是不同类别的元素对数，则兰德系数为：
+\begin{equation}
+\mathrm{RI}=\frac{a+b}{C_{2}^{n_{samples}}}.
+\end{equation}
+
+其中$C_{2}^{n_{samples}}$为数据集中可以组成的总元素对数，RI取值范围为$[0,1]$，值越大意味着聚类结果与真实情况越吻合。调整兰德系数(Adjusted rand index)具有更高的区分度：
+\begin{equation}
+\mathrm{ARI}=\frac{\mathrm{RI}-E[\mathrm{RI}]}{\max (\mathrm{RI})-E[\mathrm{RI}]}.
+\end{equation}
+
+ARI取值范围为$[-1,1]$，值越大意味着聚类结果与真实情况越吻合。从广义的角度来讲，ARI衡量的是两个数据分布的吻合程度。
+
+对于二分类问题，可将样例根据其真实类别和分类器预测类别划分为：
+\begin{itemize}
+	\item TP：真实类别为正例，预测类别为正例。
+	\item FP：真实类别为负例，预测类别为正例。
+	\item FN：真实类别为正例，预测类别为负例。
+	\item TN：真实类别为负例，预测类别为负例。
+\end{itemize}
+
+正确率是我们最常见的评价指标，表示被分对的样本数在所有的样本数中所占比例，即：
+\begin{equation}
+accuracy = \frac{TP+TF}{TP+FP+FN+TN}.
+\end{equation}
+通常来说，正确率越高，分类器越好。
+
+查准率是精确性的度量，表示被分为正例的示例中实际为正例的比例，即：
+\begin{equation}
+	precision = \frac{TP}{TP+FP}.
+\end{equation}
+
+查全率也叫做敏感度，表示正例被分类器正确探测出的比率，即：
+\begin{equation}
+	recall = \frac{TP}{TP+FN}.
+\end{equation}
+
+F1分数是统计学中用来衡量二分类模型精确度的一种指标，它同时兼顾了分类模型的查准率和查全率。F1分数可以看作是模型查准率和查全率的一种加权平均，它的最大值是1，最小值是0。数学定义如下：
+\begin{equation}
+	F1 = \frac{2\times{precision}\times{recall}}{precision+recall}.
+\end{equation}
+
+对于多分类问题，我们可以看作是n个二分类问题。正确率的计算方式显然与二分类相同，对于其他的评价指标，分为宏平均(Macro-averaging)和微平均(Micro-averaging)两种情况来进行综合考察。
+
+宏平均先分别计算各类的precision和recall，得到各类的F1，然后再计算F1的平均值。由此可以得到宏查准率(macro-P)、宏查全率(macro-R)、宏F1(macro-F1)：
+\begin{equation}
+	marcoP=\frac{1}{n}\sum_1^nP_i.
+\end{equation}
+\begin{equation}
+	marcoR=\frac{1}{n}\sum_1^nR_i.
+\end{equation}
+\begin{equation}
+	marcoF1=\frac{1}{n}\sum_1^nF1_i.
+\end{equation}
+
+微平均将n个二分类评价的TP、FP、FN对应相加，计算出所有类别总的Precision和Recall，再计算得到F1。经过推导可知，此时满足：
+\begin{equation}
+	microP=microR=microF1=accuracy
+\end{equation}
+
+\subsection{实验设置}
+
+\subsection{实验环境}
+
+\subsection{实验结果与讨论}
+
+\section{展望}
+xxx
+
+\section{大作业总结}
+本学期已经接近尾声，这份大作业也贯穿了《数据科学基础》课程的始终。三个月以来，我们小组分工合作、齐心协力，一起查阅资料，分工完成任务，对难以理解之处进行小组讨论，在这个过程中我们都从中学习了很多。完成本次大作业需要对基础理论有充分的理解，进而在此基础上进行实际的应用，对于我们的理论和实际技能都是一次很好的提升机会。课程大作业参照毕业设计的方式，按照开题、中期、答辩设置三个节点，这样有利于我们在时间上对大作业有一个整体的把握，更好地协调小组的工作进度，让大作业有条不紊地完成。
+
+由于疫情的原因，我们的上课方式改成了线上进行，虽然不能在课堂上进行面对面的交流，但整体感觉也是很扎实的。每一章的知识点都在PPT和学习指导中详细介绍，在每周二的课堂时间老师也会细细梳理一遍，然后我们在总结学习笔记的过程中再进行查漏补缺，基础知识掌握得很牢固。如今作为研究生的我们尚未返校，学习具有极大的自主性，自由支配的时间和空间变得更多，学习形式也更为灵活多样，在自学的过程中我们也应该注重知识结构的把握，有意识地锻炼自己的科学研究能力，不断提升理论水准，并将知识与能力结合。学习是一个长期积累的过程，在以后的工作、生活中都就应不断地学习，努力提高自我知识和综合素质。
+
+本学期以来，我们都从《数据科学基础》课程中学习到了很多知识，对于这门课程我们还有一些小小的建议。由于线上的特殊授课方式，老师和同学之间的交流互动似乎过少了。如果在课堂上增加一些互动的环节，或许同学们能更加积极地参与其中，老师也能更准确地掌握学生的学习状况。另外，学习笔记中大部分都是定义、原理、公式推导等理论型的题目，且大多都能在PPT的对应章节找到答案，这样可能会导致学生在学习时只是机械地做一些“知识搬运”的工作。可以考虑在作业中也增加一些开放性较强、偏应用型的题目，鼓励学生多思考，灵活运用所学的理论知识。
+
+感谢老师和助教同学一学期以来的辛苦付出，你们辛苦了！
+\section{小组同学分工说明}
+xxx
+
+\begin{thebibliography}{99}
+	\bibitem{ref1}Wu M, Zhang Z. Handwritten digit classification using the mnist data set[J]. Course project CSE802: Pattern Classification \& Analysis, 2010.
+	\bibitem{ref2}Gupta L, Sortrakul T. A Gaussian-mixture-based image segmentation algorithm[J]. Pattern Recognition, 1998, 31(3): 315-325.
+	\bibitem{ref3}McLachlan G J, Krishnan T. The EM algorithm and extensions[M]. John Wiley \& Sons, 2007. 
+	\bibitem{ref4}Dempster A P, Laird N M, Rubin D B. Maximum likelihood from incomplete data via the EM algorithm[J]. Journal of the Royal Statistical Society: Series B (Methodological), 1977, 39(1): 1-22. 
+	\bibitem{ref5}Goodfellow I, Bengio Y, Courville A. Deep learning[M]. MIT press, 2016.
+	\bibitem{ref6}周志华. 机器学习[M]. 北京:清华大学出版社, 2016.
+	\bibitem{ref7}李航. 统计学习方法[M]. 北京:清华大学出版社, 2012.
+	\bibitem{ref8}Bishop C M. Pattern recognition and machine learning[M]. springer, 2006.
+	\bibitem{ref9}XIAO Z, WANG J. Image classification algorithm based on PCA and GMM[J]. Computer Engineering and Design, 2006, 27(11): 1951-1953.
+	\bibitem{ref10}Bouman C A, Shapiro M, Cook G W, et al. Cluster: An unsupervised algorithm for modeling Gaussian mixtures[J]. 1997.
+	\bibitem{ref11}陈雪峰. 图像高斯混合模型的判别学习方法[D].北京理工大学,2009.
+	\bibitem{ref12}Xuan G, Zhang W, Chai P. EM algorithms of Gaussian mixture model and hidden Markov model[C]//Proceedings 2001 International Conference on Image Processing (Cat. No. 01CH37205). IEEE, 2001, 1: 145-148.
+	\bibitem{ref13}Reynolds D A. Gaussian Mixture Models[J]. Encyclopedia of biometrics, 2009, 741.
+
+	
+\end{thebibliography}
 
 \end{document}
