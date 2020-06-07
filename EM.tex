@@ -546,6 +546,7 @@ GMM在实际应用中十分广泛，比如语音识别、图像生成、以及�
 本实验采用的MNIST数据库是由Yann LeCun教授提供的手写数字数据库文件，该数据集包含了60000张训练图像和10000张测试图像。这些数字已经过尺寸标准化并位于图像中心，且图像是28*28大小的灰度图像，每个像素是一个八位字节。数据集共包括四个文件，一个训练图片集train-images-idx3-ubyte.gz，一个训练标签集train-labels-idx1-ubyte.gz，一个测试图片集t10k-images-idx3-ubyte.gz，一个测试标签集t10k-labels-idx1-ubyte.gz。上述四个文件直接解压就可以使用了。
 
 \subsubsection{评价指标}
+
 在本实验中，手写数字识别的评价指标采用了调整兰德系数(Adjusted rand index)，正确率(accuracy)，查准率(precision)，查全率(recall)，F1分数(F1-Score)。
 
 兰德系数(Rand index)需要给定实际类别信息 $C$，假设$K$是聚类结果，$a$表示在$C$与$K$中都是同类别的元素对数，$b$表示在$C$与$K$中都是不同类别的元素对数，则兰德系数为：
@@ -610,7 +611,7 @@ F1分数是统计学中用来衡量二分类模型精确度的一种指标，它
 \subsection{实验设置}
 本次实验主要分为三部分，第一部分为采取GMM模型对mnist数据集进行聚类，然后通过Adjusted rand index，acc，precision，recall，f1-score这些评价标准对聚类的结果进行一个评判；第二部分则是包含采用GMM模型直接对mnist数据集中的每一类样本进行单独建模，最后采用最大似然的方法对新来的测试样本进行预测，从而解决了mnist数据集上的分类任务；最后一部分则是在mnist数据集上实现新的样本生成。
 
-\subsubsection{聚类任务}
+\subsubsection{整体聚类}
 
 聚类任务主要分为三个步骤，数据预处理，模型预测，性能评估。
 
@@ -628,9 +629,9 @@ mnist数据集原始是6万张训练样本，1万张测试样本。由于本部�
 \end{figure}
 
 
-（2）\textbf{模型预测}
+（2）\textbf{模型学习}
 
-实际上，由于MNIST数据集我们是已知先验知识为10各类别，因此我们直接选取components=10作为高斯分布的个数，聚类模型我们选取含有10个高斯分布GMM模型对这7万张图片进行聚类。同时在聚类结束后给出这7万张图片预测的标签。
+实际上，由于MNIST数据集我们是已知先验知识为10个类别，因此我们直接选取components=10作为高斯分布的个数，聚类模型我们选取含有10个高斯分布GMM模型对这7万张图片进行聚类。同时在聚类结束后给出这7万张图片预测的标签。
 
 （3）\textbf{性能评估}
 
@@ -638,11 +639,31 @@ mnist数据集原始是6万张训练样本，1万张测试样本。由于本部�
 
 此外除了衡量聚类的结果，我们进一步想通过聚类的结果对样本的标签进行预测。因此我们提出了一种新的与标签相关的评测方法：具体来说，对于已经无监督聚类得到这10个未知的类之后，我们对每一类的真实标签进行计数统计，选取票数最高的真实标签作为预测的标签，并作为整个聚类簇的标签，最后我们将这所有样本预测的标签与真实的标签进行对比，便可计算出ACC，precision，recall，f1-score这些常见的分类评价指标。
 
+\subsubsection{单独聚类}
+
+（1）\textbf{数据预处理}
+
+这里我们采用原始 MNIST 数据集的训练集测试集划分，原始的手写数字维度为$28 \times 28$，我们在聚类中弱化其空间结构，将其展开为784维的向量。众所周知，手写数字中存在很多空白的像素，而他们对于我们的聚类任务来说是不太重要的，因此考虑在聚类前使用PCA进行降维，保留更为重要的维度进行聚类，同时数据维度的降低也可以提升模型学习的速度和精度，使得模型取得更好的表现。
+
+（2）\textbf{模型学习}
+
+\begin{figure}[!h]
+  \includegraphics[width=0.8\textwidth]{./figures/diff4.pdf}
+  \centering
+  \caption{数字4的5种不同写法}\label{fig:diff4}
+\end{figure}
+
+由于每一个数字的手写方法可能不唯一，而直接聚类可能存在重复类别的问题，直观的讲，如图~\ref{fig:diff4} 所示，数字4有5种不同的写法，如果用直接聚类去做的话，我们很难保证最后的聚类结果中不会出现两个表征4的类，这样就有可能会挤掉其他的类，如此一来，就会使得聚类结果不太理想。于是考虑分类别聚类，顾名思义，就是对于每一个类别，选取相对应的子数据集，然后训练一个高斯混合模型来表征这个类别，这样就可以捕获同一数字不同的写法，达到更好的识别效果。
+
+（3）\textbf{性能评估}
+
+模型学习结束后，我们会得到10个GMM模型，每个模型对应于一个数字的分布，该分布一般具有多峰性，其不同的峰代表该数字不同的写法。当我们拿到一个新数据时，模型会分别计算其在每一个数字类上的似然，然后选取似然最大的数字类作为最后的预测结果，从而评估模型的性能。因为整个模型看起来类似于多分类任务，所以选择$accuracy, precision, recall, F1$作为衡量指标。
+
 \subsection{实验环境}
 
 \subsection{实验结果与讨论}
 
-\subsubsection{聚类任务的实验结果及结论}
+\subsubsection{整体聚类}
 
 我们把PCA降维的维度d作为横轴，分别把Adjusted rand index，acc，precision，recall，f1-score这些评价标准作为纵轴，将其结果可视化出来，如下图\ref{cluster_adjusted_rand_score},\ref{cluster_acc},\ref{cluster_precision},\ref{cluster_recall},\ref{cluster_f1}所示。
 
@@ -686,6 +707,49 @@ mnist数据集原始是6万张训练样本，1万张测试样本。由于本部�
 \end{figure}
 
 首先根据上述五个实验结果图，可以看出，当PCA降维的维度为20时，模型聚类的效果最好。但是仔细看会发现模型预测的acc，f1-score等值并不是很高，这与我们常见的其他机器学习模型进行分类的结果相差甚远，因此产生了疑问。再经过仔细检查后发现，其实是预测方法存在一定的漏洞，虽然GMM模型将原始的数据集聚成10个簇，但是在预测标签时，可能会出现不同的簇它们出现最多的标签是同一个，此时会导致最后预测的标签只剩下不到10个类别，因此会丢失很多信息，导致了这样准确率不高的结果。
+
+\subsubsection{单独聚类}
+
+在这个任务中，可以设置不同个数的数字书写方式，即GMM的component的个数，而GMM的类中心初始化方式通常有Kmeans初始化以及随机初始化，对于GMM模型类与类之间的关系，存在独立和相关两种考量，分别对应对角线协方差矩阵以及非对角线对称矩阵。对这些变量进行评估，我们可以得到如图~\ref{fig:2-contrast} 的结果。
+
+\begin{figure}[!h]
+  \centering
+  \subfigure[]{
+    \includegraphics[width=0.45\textwidth]{figures/err.pdf}\label{fig:2-err}
+  }\quad  
+  \subfigure[]{
+    \includegraphics[width=0.45\textwidth]{figures/cost.pdf}\label{fig:2-cost}
+  }
+  \caption{不同的类中心初始化方式以及不同的协方差矩阵下，评估不同的分量个数对于分类误差和训练时间的影响。Full、Diag分别对应类与类之间独立和相关，Kmeans、Rand分别对应Kmeans初始化和随机初始化类中心。}\label{fig:2-contrast}
+\end{figure}
+
+从图~\ref{fig:2-err} 可以看到，若假设类与类之间相互独立，则其效果较差，因为不同类之间一般并非完全独立，都存在相互影响的关系，但是由于不考虑类之间的关系会使得计算变得很容易，因此时间消耗会相对应地减少（如图~\ref{fig:2-cost}）。在考虑类与类之间不独立的情况下，我们还可以发现，随机初始化类中心会稍微比较耗时，同时其性能波动较大，但是整体趋于稳定，且在分量个数小于22的时候，其性能一般比Kmeans初始化要好。而Kmeans初始化的效果在随着分量个数增加而逐步降低，趋势性较强。
+
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=0.5\textwidth]{figures/4metric.pdf}
+  % \subfigure[]{
+  %   \includegraphics[width=0.22\textwidth]{figures/acc.pdf}\label{fig:2-acc}
+  % }\quad
+  % \subfigure[]{
+  %   \includegraphics[width=0.22\textwidth]{figures/p.pdf}\label{fig:2-p}
+  % }\quad
+  % \subfigure[]{
+  %   \includegraphics[width=0.22\textwidth]{figures/r.pdf}\label{fig:2-r}
+  % }\quad  
+  % \subfigure[]{
+  %   \includegraphics[width=0.22\textwidth]{figures/f1.pdf}\label{fig:2-f1}
+  % }
+  \caption{考虑类与类之间不独立，用Kmeans初始化类中心的前提下，四种评测指标随分量个数的变化。}\label{fig:2-4metrics}
+\end{figure}
+
+最终，我们的单独聚类模型得到的类均值展示如图~\ref{fig:2-class_means} 所示，可以看到，每个数字都存在一些不同的写法，包括书写字体、书写角度以及书写清晰度，由此可见，对每一个数字类别单独聚类是非常有必要的。
+
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{figures/digits.pdf}
+  \vspace{-.3cm}\caption{单独聚类模型的各个类均值展示}\label{fig:2-class_means}
+\end{figure}
 
 \section{展望}
 xxx
