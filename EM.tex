@@ -539,14 +539,14 @@ log似然函数为：
 
 \subsubsection{评价指标}
 
-在本实验中，手写数字识别的评价指标采用了调整兰德系数(Adjusted rand index)，正确率(accuracy)，查准率(precision)，查全率(recall)，F1分数(F1-Score)。
+在本实验中，手写数字识别的评价指标采用了调整兰德系数（Adjusted rand index），正确率（accuracy），查准率（precision），查全率（recall），F1分数（F1-Score）。
 
 兰德系数(Rand index)需要给定实际类别信息 $C$，假设$K$是聚类结果，$a$表示在$C$与$K$中都是同类别的元素对数，$b$表示在$C$与$K$中都是不同类别的元素对数，则兰德系数为：
 \begin{equation}
 \mathrm{RI}=\frac{a+b}{C_{2}^{n_{samples}}}.
 \end{equation}
 
-其中$C_{2}^{n_{samples}}$为数据集中可以组成的总元素对数，RI取值范围为$[0,1]$，值越大意味着聚类结果与真实情况越吻合。调整兰德系数(Adjusted rand index)具有更高的区分度：
+其中$C_{2}^{n_{samples}}$为数据集中可以组成的总元素对数，RI取值范围为$[0,1]$，值越大意味着聚类结果与真实情况越吻合。调整兰德系数（Adjusted rand index）具有更高的区分度：
 \begin{equation}
 \mathrm{ARI}=\frac{\mathrm{RI}-E[\mathrm{RI}]}{\max (\mathrm{RI})-E[\mathrm{RI}]}.
 \end{equation}
@@ -602,7 +602,7 @@ F1分数是统计学中用来衡量二分类模型精确度的一种指标，它
 
 \subsection{实验设置}
 
-本次实验主要分为三部分，第一部分为采取GMM模型对MNIST数据集进行聚类，然后通过$Adjusted rand index$，$accuracy$，$precision$，$recall$，$F1$这些评价标准对聚类的结果进行一个评判；第二部分则是包含采用GMM模型直接对MNIST数据集中的每一类样本进行单独建模，最后采用最大似然的方法对新来的测试样本进行预测，从而解决了MNIST数据集上的分类任务；最后一部分则是在MNIST数据集上实现新的样本生成。
+本次实验主要分为三部分，第一部分为采取GMM模型对MNIST数据集进行聚类，然后通过$Adjusted~rand~index$，$accuracy$，$precision$，$recall$，$F1$这些评价标准对聚类的结果进行一个评判；第二部分则是包含采用GMM模型直接对MNIST数据集中的每一类样本进行单独建模，最后采用最大似然的方法对新来的测试样本进行预测，从而解决了MNIST数据集上的分类任务；最后一部分则是在MNIST数据集上实现新的样本生成。
 
 \subsubsection{整体聚类}
 
@@ -628,7 +628,7 @@ MNIST数据集原始是6万张训练样本，1万张测试样本。由于本部�
 
 （3）\textbf{性能评估}
 
-关于性能评估，首先是对于聚类结果的一个直观上的评估，即判断聚类的每一类是否与真实的类分布吻合，因此很自然我们采用$Adjusted rand index$这个评价标准来评判聚类的效果。调整兰德指数通过考虑所有样本并计算在预测的聚类和真实的聚类中分配在相同或不同聚类中的对来计算两个聚类之间的相似性度量。
+关于性能评估，首先是对于聚类结果的一个直观上的评估，即判断聚类的每一类是否与真实的类分布吻合，因此很自然我们采用$Adjusted~rand~index$这个评价标准来评判聚类的效果。调整兰德指数通过考虑所有样本并计算在预测的聚类和真实的聚类中分配在相同或不同聚类中的对来计算两个聚类之间的相似性度量。
 
 此外除了衡量聚类的结果，我们进一步想通过聚类的结果对样本的标签进行预测。因此我们提出了一种新的与标签相关的评测方法：具体来说，对于已经无监督聚类得到这10个未知的类之后，我们对每一类的真实标签进行计数统计，选取票数最高的真实标签作为预测的标签，并作为整个聚类簇的标签，最后我们将这所有样本预测的标签与真实的标签进行对比，便可计算出$accuracy$，$precision$，$recall$，$F1$这些常见的分类评价指标。
 
@@ -701,7 +701,7 @@ MNIST数据集原始是6万张训练样本，1万张测试样本。由于本部�
 \begin{figure}[!h]
   \includegraphics[width=0.5\textwidth]{./figures/cluster_adjusted_rand_score.png}
   \centering
-  \caption{adjusted rand score随d的变化图}
+  \caption{$Adjusted~rand~index$随d的变化图}
   \label{cluster_adjusted_rand_score}
 \end{figure}
 
@@ -729,7 +729,7 @@ MNIST数据集原始是6万张训练样本，1万张测试样本。由于本部�
   \label{GMM_means}
 \end{figure}
 
-我们把PCA降维的维度$d$作为横轴，分别把$Adjusted rand index$，$accuracy$，$precision$，$recall$，$F1$这些评价标准作为纵轴，将其结果可视化出来，如下图~\ref{cluster_adjusted_rand_score},~\ref{fig:cluster_metrics}所示。
+我们把PCA降维的维度$d$作为横轴，分别把$Adjusted~rand~index$，$accuracy$，$precision$，$recall$，$F1$这些评价标准作为纵轴，将其结果可视化出来，如下图~\ref{cluster_adjusted_rand_score},~\ref{fig:cluster_metrics}所示。
 
 % \begin{figure}[!h]
 %   \includegraphics[width=0.5\textwidth]{./figures/cluster_acc.png}
