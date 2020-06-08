@@ -363,31 +363,33 @@ $p1*f(x1)+p2*f(x2) \le f(p1*x1+p2*x2)$总是成立，即函数的期望总是不
 
 高斯混合模型（Guassian Mixture Model, 简称GMM），为单一高斯概率密度函数的延伸，用多个高斯概率密度函数（正态分布曲线）精确地量化变量分布，是将变量分布分解为若干基于高斯概率密度函数（正态分布曲线）分布的统计模型。
 
-以下分别用单高斯模型和混合高斯模型分析同一组样本点。图\ref{SGM-model} 使用单个二维高斯分布来描述数据，椭圆即为二倍标准差的正态分布椭圆。图\ref{GMM-model} 使用两个二维高斯分布来描述数据，分别记为$\mathcal N({\mu}_1,{\Sigma}_1)$和$\mathcal N({\mu}_2,{\Sigma}_2)$，两个椭圆分别是这两个高斯分布的二倍标准差椭圆。
+图\ref{SGM-model&GMM-model}分别用单高斯模型和混合高斯模型分析同一组样本点。图\ref{SGM-model} 使用单个二维高斯分布来描述数据，椭圆即为二倍标准差的正态分布椭圆。图\ref{GMM-model} 使用两个二维高斯分布来描述数据，分别记为$\mathcal N({\mu}_1,{\Sigma}_1)$和$\mathcal N({\mu}_2,{\Sigma}_2)$，两个椭圆分别是这两个高斯分布的二倍标准差椭圆。
+
 \begin{figure}[!h]
-  \includegraphics[width=0.5\textwidth]{./figures/SGM.jpg}
-  \centering
-  \caption{单个二维高斯分布拟合数据}
-  \label{SGM-model}
-\end{figure}
-\begin{figure}[!h]
-  \includegraphics[width=0.5\textwidth]{./figures/GMM.jpg}
-  \centering
-  \caption{两个二维高斯分布拟合数据}
-  \label{GMM-model}
+	\centering
+	\subfigure[]{
+		\includegraphics[width=0.45\textwidth]{figures/SGM.jpg}
+		\label{SGM-model}
+	}\quad  
+	\subfigure[]{
+		\includegraphics[width=0.45\textwidth]{figures/GMM.jpg}
+		\label{GMM-model}
+	}
+	\caption{单个二维高斯分布拟合数据 \& 两个二维高斯分布拟合数据}
+	\label{SGM-model&GMM-model}
 \end{figure}
 
-可以看到使用两个二维高斯分布来描述图中的数据显然更合理。实际上图中的两个聚类的中的点是通过两个不同的正态分布随机生成而来。如果将两个二维高斯分布为$\mathcal N({\mu}_1,{\Sigma}_1)$和$\mathcal N({\mu}_2,{\Sigma}_2)$合成一个二维的分布，那么就可以用合成后的分布来描述图\ref{GMM-model} 中的所有点。最直观的方法就是对这两个二维高斯分布做线性组合，用线性组合后的分布来描述整个集合中的数据。
+可以看到使用两个二维高斯分布来描述图中的数据显然更合理。实际上图中的两个聚类的中的点是通过两个不同的正态分布随机生成而来。如果将两个二维高斯分布为$\mathcal N({\mu}_1,{\Sigma}_1)$和$\mathcal N({\mu}_2,{\Sigma}_2)$合成一个二维的分布，那么就可以用合成后的分布来描述图\ref{GMM-model}中的所有点。最直观的方法就是对这两个二维高斯分布做线性组合，用线性组合后的分布来描述整个集合中的数据。
 
 提出混合模型主要是为了能更好地近似一些较复杂的样本分布，通过不断增加单个分布的个数，可以任意地逼近任何连续的概率分布，所以我们认为任何样本分布都可以用混合模型来建模。为什么我们要假设数据是由若干个高斯分布组合而成的，而不假设是其他分布呢？实际上不管是什么分布，只要数量取得足够大，这个混合模型就会变得足够复杂，就可以用来逼近任意连续的概率密度分布。只是因为高斯函数具有良好的计算性能，所以GMM被广泛地应用。
 
-GMM与k-means类似，也是常见的聚类算法。不同的是，k-means把每个样本点分配到其中某一个cluster，而GMM是学习出一些概率密度函数，给出这些样本点分配到每个cluster的概率，每个单分布就是一个聚类中心，也称为软聚类。所以GMM 不仅仅可以用于聚类，还可以用于概率密度的估计。
+GMM与Kmeans类似，也是常见的聚类算法。不同的是，Kmeans把每个样本点分配到其中某一个cluster，而GMM是学习出一些概率密度函数，给出这些样本点分配到每个cluster的概率，每个单分布就是一个聚类中心，也称为软聚类。所以GMM不仅仅可以用于聚类，还可以用于概率密度的估计。
 
-设有随机变量$X$，则GMM的概率密度函数可以用下式表示：
+设有随机变量$X$，则GMM的概率密度函数可以用式(\ref{GMM})表示：
 \begin{equation}\label{GMM}
   \begin{split}
     p(x) &= \sum_{k=1}^{K}p(k)p(x|k)\\
-    &= \sum_{k=1}^{K}\pi_k\mathcal{N}(x|\mu_k, \Sigma_k).
+    &= \sum_{k=1}^{K}\pi_k\mathcal{N}\left(x\big|\mu_k, \Sigma_k\right).
   \end{split}
 \end{equation}
 
@@ -401,12 +403,12 @@ GMM与k-means类似，也是常见的聚类算法。不同的是，k-means把每
 \end{equation}
 而一般对于单个样本点其概率较小，多个相乘后更小，容易造成浮点数下溢，所以一般是对似然函数求对数，变成加和形式：$\sum_{i=1}^{N}\ln p(x_i)$。这个叫做log似然函数，目标是要最大化它。用log似然函数对参数分别求偏导，令偏导等于0，可求解得参数。然而，GMM的log似然函数是如下形式：
 \begin{equation}
-  \ln L(\mu,\sigma,\pi) = \sum_{i=1}^{N}\ln\sum_{k=1}^{K}\pi_k\mathcal{N}(y_n|\mu_k,\sigma_k).
+  \ln L(\mu,\sigma,\pi) = \sum_{i=1}^{N}\ln\sum_{k=1}^{K}\pi_k\mathcal{N}\left(y_n\big|\mu_k,\sigma_k\right).
 \end{equation}
 
 可以看到对数中有求和，直接求导求解将导致一系列复杂的运算，无法求出这个对数似然函数的最大值，故考虑使用EM算法。
 
-那么极大似然估计与EM算法分别适用于什么问题呢？如果我们已经清楚了某个变量服从的高斯分布，而且通过采样得到了这个变量的样本数据，想求高斯分布的参数，这时候极大似然估计可以胜任这个任务；而如果我们要求解的是一个混合模型，只知道混合模型中各个类的分布模型（譬如都是高斯分布）和对应的采样数据，而不知道这些采样数据分别来源于哪一类（隐变量），那这时候就可以借鉴EM算法。EM算法可以用于解决数据缺失的参数估计问题（隐变量的存在实际上就是数据缺失问题，缺失了各个样本来源于哪一类的记录）。
+那么极大似然估计与EM算法分别适用于什么问题呢？如果我们已经清楚某个变量服从高斯分布，而且通过采样得到了这个变量的样本数据，想要求高斯分布的参数，这时候极大似然估计可以胜任这个任务；而如果我们要求解的是一个混合模型，只知道混合模型中各个类的分布模型（譬如都是高斯分布）和对应的采样数据，而不知道这些采样数据分别来源于哪一类（隐变量），那这时候就可以借鉴EM算法。EM算法可以用于解决数据缺失的参数估计问题（隐变量的存在实际上就是数据缺失问题，缺失了各个样本来源于哪一类的记录）。
 
 EM算法分两步，第一步先求出要估计参数的粗略值，第二步使用第一步的值最大化似然函数。因此要先求出GMM的似然函数。
 
@@ -414,11 +416,11 @@ EM算法分两步，第一步先求出要估计参数的粗略值，第二步使
 
 假设$\mathbf z$是已知的，则样本集变成了${X,Z}$，要求解的似然函数变成了：
 \begin{equation}
-  p(X,Z|\mu,\sum,\pi) = \prod_{n=1}^N\prod_{k=1}^K\pi_k^{z_{nk}}\mathcal N(\mathbf x_n|\mu_k,\sum_k)^{z_{nk}}.
+  p\left(X,Z\big|\mu,\sum,\pi\right) = \prod_{n=1}^N\prod_{k=1}^K\pi_k^{z_{nk}}\mathcal N\left(\mathbf x_n\big|\mu_k,\sum_k\right)^{z_{nk}}.
 \end{equation}
 log似然函数为：
 \begin{equation}\label{loglikelihood}
-  \ln p(X,Z|\mu,\sum,\pi) = \sum_{n=1}^N\sum_{k=1}^K\mathbf z_{nk}[\ln\pi_k + \ln\mathcal N(\mathbf x_n|\mu_k,\sum_k)].
+  \ln p\left(X,Z\big|\mu,\sum,\pi\right) = \sum_{n=1}^N\sum_{k=1}^K\mathbf z_{nk}\left[\ln\pi_k + \ln\mathcal N\left(\mathbf x_n\big|\mu_k,\sum_k\right)\right].
 \end{equation}
 
 可以看到，这次 ln 直接对Gaussian作用，求和在 ln 外面，所以可以直接求最大似然解了。
@@ -436,21 +438,21 @@ log似然函数为：
   p(\mathbf z) = \prod_{k=1}^K\pi_k^{z_k}.
 \end{equation}
 \begin{equation}
-  p(\mathbf x|\mathbf z_k=1) = \mathcal N(x|\mu_k,\sum_k).
+  p(\mathbf x|\mathbf z_k=1) = \mathcal N\left(\mathbf x\big|\mu_k,\sum_k\right).
 \end{equation}
 \begin{equation}
-  p(\mathbf x|\mathbf z) = \prod_{k=1}^K\mathcal N(\mathbf x|\mu_k,\sum_k)^{z_k}.
+  p(\mathbf x|\mathbf z) = \prod_{k=1}^K\mathcal N\left(\mathbf x\big|\mu_k,\sum_k\right)^{z_k}.
 \end{equation}
 \begin{equation}
   \begin{split}
     p(\mathbf x) &= \sum_zp(\mathbf z)p(\mathbf x|\mathbf z)\\
-    &= \sum_{k=1}^K\pi_k\mathcal N(\mathbf x|\mu_k,\sum_k).
+    &= \sum_{k=1}^K\pi_k\mathcal N\left(\mathbf x\big|\mu_k,\sum_k\right).
   \end{split}
 \end{equation}
 
-后验概率（固定$\mu,\sum,\pi$):
+后验概率（固定$\mu,\sum,\pi$）:
 \begin{equation}
-  p(\mathbf z|\mathbf x,\mu,\sum,\pi) = \frac{p(\mathbf x|\mathbf z)p(\mathbf z)}{p(\mathbf x)}\text{正比于}\prod_{n=1}^N\prod_{k=1}^K[{\pi_k\mathcal N(x_n|\mu_k,\sum_k)}]^{z_{nk}}.
+  p\left(\mathbf z\big|\mathbf x,\mu,\sum,\pi\right) = \frac{p(\mathbf x|\mathbf z)p(\mathbf z)}{p(\mathbf x)} \propto \prod_{n=1}^N\prod_{k=1}^K\left[{\pi_k\mathcal N\left(x_n\big|\mu_k,\sum_k\right)}\right]^{z_{nk}}.
 \end{equation}
 
 因为${\mathbf z_n}$之间是相互独立的。
@@ -462,13 +464,13 @@ log似然函数为：
     &= 0*p(\mathbf z_{nk}=0|\mathbf x_n)+1*p(\mathbf z_{nk}=1|\mathbf x_n)\\
     &=p(\mathbf z_{nk}=1|\mathbf x_n)\\
     &=\frac{p(\mathbf z_{nk}=1)p(\mathbf x_n|\mathbf z_{nk}=1)}{p(\mathbf x_n)}\\
-    &=\frac{\pi_k\mathcal N(\mathbf x|\mu_k,\sum_k)}{\sum_{j=1}^K\pi_j\mathcal N(\mathbf x|\mu_j,\sum_j)}.
+    &=\frac{\pi_k\mathcal N\left(\mathbf x\big|\mu_k,\sum_k\right)}{\sum_{j=1}^K\pi_j\mathcal N\left(\mathbf x\big|\mu_j,\sum_j\right)}.
   \end{split}
 \end{equation}
 
 将$\mathbf z$值用期望代替，则待求解的log似然函数(\ref{loglikelihood})式变为：
 \begin{equation}
-  E_z[\ln p(X,Z|\mu,\sum,\pi)] = \sum_{n=1}^N\sum_{k=1}^K\gamma (\mathbf z_{nk})[\ln\pi_k + \ln\mathcal N(\mathbf x_n|\mu_k,\sum_k)].
+  E_z\left[\ln p\left(X,Z\big|\mu,\sum,\pi\right)\right] = \sum_{n=1}^N\sum_{k=1}^K\gamma (\mathbf z_{nk})\left[\ln\pi_k + \ln\mathcal N\left(\mathbf x_n\big|\mu_k,\sum_k\right)\right].
 \end{equation}
 
 \textbf{3. M-step}
@@ -490,12 +492,12 @@ log似然函数为：
 
 构造拉格朗日函数：
 \begin{equation}
-  L=\ln p(X|\pi,\mu,\sum)+\lambda(\sum_{k=1}^K\pi_k-1).
+  L=\ln p\left(X\big|\pi,\mu,\sum\right)+\lambda\left(\sum_{k=1}^K\pi_k-1\right).
 \end{equation}
 
 对$\pi$求导，令导数为0：
 \begin{equation}
-  \sum_{n=1}^N\frac{\mathcal N(\mathbf x|\mu_k,\sum_k)}{\sum_{j=1}^K\pi_j\mathcal N(\mathbf x|\mu_j,\sum_j)}+\lambda=0.
+  \sum_{n=1}^N\frac{\mathcal N\left(\mathbf x\big|\mu_k,\sum_k\right)}{\sum_{j=1}^K\pi_j\mathcal N\left(\mathbf x\big|\mu_j,\sum_j\right)}+\lambda=0.
 \end{equation}
 
 两边同乘$\pi_k$得：
@@ -642,7 +644,7 @@ MNIST数据集原始是6万张训练样本，1万张测试样本。由于本部�
 
 （3）\textbf{性能评估}
 
-模型学习结束后，我们会得到10个GMM模型，每个模型对应于一个数字的分布，该分布一般具有多峰性，其不同的峰代表该数字不同的写法。当我们拿到一个新数据时，模型会分别计算其在每一个数字类上的似然，然后选取似然最大的数字类作为最后的预测结果，从而评估模型的性能。因为整个模型看起来类似于多分类任务，所以选择$accuracy, precision, recall, F1$作为衡量指标。
+模型学习结束后，我们会得到10个GMM模型，每个模型对应于一个数字的分布，该分布一般具有多峰性，其不同的峰代表该数字不同的写法。当我们拿到一个新数据时，模型会分别计算其在每一个数字类上的似然，然后选取似然最大的数字类作为最后的预测结果，从而评估模型的性能。因为整个模型看起来类似于多分类任务，所以选择$accuracy$，$precision$，$recall$，$F1$作为衡量指标。
 
 \subsubsection{生成手写数字}
 
@@ -810,6 +812,15 @@ MNIST数据集原始是6万张训练样本，1万张测试样本。由于本部�
 %   \includegraphics[width=0.9\textwidth]{figures/digits.pdf}
 %   \vspace{-.3cm}\caption{单独聚类模型的各个类均值展示}\label{fig:2-class_means}
 % \end{figure}
+
+\subsubsection{生成手写数字}
+生成的手写数字如图\ref{gen_digit}：
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=0.8\textwidth]{./figures/gen0-9.png}
+	\caption{生成手写数字0-9}
+	\label{gen_digit}
+\end{figure}
 
 \section{展望}
 
