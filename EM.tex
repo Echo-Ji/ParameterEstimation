@@ -205,7 +205,7 @@ $\mathcal{L}(\theta|X)$的表达实里存在求和之后取对数的情况，
 通常会看到教科书或者网课上给出如公式(\ref{IF4EM}) 所示的迭代关系，
 其中，$X$代表所有数据样本，$Z$ 代表隐变量，$\theta$是模型参数，其右上角的角标代表迭代轮数。
 \begin{equation}\label{IF4EM}
-  \textcolor[rgb]{0.0,0.0,0.8}{\theta^{(g+1)} = \argmax_{\theta} \int_{Z}\mathrm{log}P (X, Z | \theta) P \left(Z|X, \theta^{(g)} \right)dZ}.
+  {\theta^{(g+1)} = \argmax_{\theta} \int_{Z}\mathrm{log}P (X, Z | \theta) P \left(Z|X, \theta^{(g)} \right)dZ}.
 \end{equation}
 但是为什么是这样的迭代关系呢？我们一步步来分析。
 
@@ -216,7 +216,7 @@ $\mathcal{L}(\theta|X)$的表达实里存在求和之后取对数的情况，
 \end{equation}
 也可以将其展开，
 \begin{equation}\label{EMCondition}
-  \textcolor[rgb]{0.0,0.0,0.8}{\mathrm{log}P \left(X|\theta^{(g+1)} \right) \ge \mathrm{log} P \left(X|\theta^{(g)}\right)}.
+  {\mathrm{log}P \left(X|\theta^{(g+1)} \right) \ge \mathrm{log} P \left(X|\theta^{(g)}\right)}.
 \end{equation}
 
 可以看到，目前为止隐变量还没有出现，下面来看对数似然函数本身，我们结合贝叶斯公式引入隐变量$Z$，
@@ -240,7 +240,7 @@ $\mathcal{L}(\theta|X)$的表达实里存在求和之后取对数的情况，
 \end{equation}
 因为变量空间中所有事件的概率和为1，即$\int_{Z}P(Z|X,\theta^{(g)})dZ = 1$，因此可以将上式化简为
 \begin{equation}\label{QH}
-  \textcolor[rgb]{0.0,0.0,0.8}{\mathrm{log}P(X|\theta) = \underbrace{\int_{Z}\mathrm{log}P(X,Z|\theta)P\left(Z|X,\theta^{(g)}\right)dZ}_{Q\left(\theta,\theta^{(g)}\right)} - \underbrace{\int_{Z}\mathrm{log}P(Z|X,\theta)P\left(Z|X,\theta^{(g)}\right)dZ}_{H\left(\theta, \theta^{(g)}\right)}}.
+  {\mathrm{log}P(X|\theta) = \underbrace{\int_{Z}\mathrm{log}P(X,Z|\theta)P\left(Z|X,\theta^{(g)}\right)dZ}_{Q\left(\theta,\theta^{(g)}\right)} - \underbrace{\int_{Z}\mathrm{log}P(Z|X,\theta)P\left(Z|X,\theta^{(g)}\right)dZ}_{H\left(\theta, \theta^{(g)}\right)}}.
 \end{equation}
 
 至此，我们有一个问题还没有考虑：为什么要依照概率$P(Z|X,\theta^{(g)})$求期望呢？
